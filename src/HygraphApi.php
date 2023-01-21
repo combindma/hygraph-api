@@ -20,9 +20,9 @@ class HygraphApi
 
     public function __construct()
     {
-        $this->endpoint = config('hypgraph.content_api');
-        $this->token = config('hypgraph.token');
-        $this->ttl = config('hypgraph.cache_ttl');
+        $this->endpoint = config('hygraph.content_api');
+        $this->token = config('hygraph.token');
+        $this->ttl = config('hygraph.cache_ttl');
     }
 
     protected function query(Query $query): array|object|null
