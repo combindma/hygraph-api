@@ -6,6 +6,4 @@ return [
     'token' => env('HYPGRAPH_TOKEN'),
 
     'cache_ttl' => 60 * 60 * 24 * 30,
-
-    'enable_seo' => true,
 ];

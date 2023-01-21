@@ -13,4 +13,15 @@ class HygraphApiServiceProvider extends PackageServiceProvider
             ->name('hygraph-api')
             ->hasConfigFile('hygraph');
     }
+
+    public function registeringPackage()
+    {
+        $this->app->singleton(HygraphApi::class, function ($app) {
+            return new HygraphApi();
+        });
+
+        $this->app->singleton(SeoHelper::class, function ($app) {
+            return new SeoHelper();
+        });
+    }
 }

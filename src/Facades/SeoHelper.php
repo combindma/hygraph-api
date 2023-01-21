@@ -5,12 +5,12 @@ namespace Combindma\HygraphApi\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Combindma\HygraphApi\HygraphApi
+ * @see \Combindma\HygraphApi\SeoHelper
  */
-class HygraphApi extends Facade
+class SeoHelper extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \Combindma\HygraphApi\HygraphApi::class;
+        return \Combindma\HygraphApi\SeoHelper::class;
     }
 }
