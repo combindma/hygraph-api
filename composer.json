@@ -1,17 +1,17 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "combindma/hygraph-api",
+    "description": "Hygraph Api",
     "keywords": [
-        ":vendor_name",
+        "combindma",
         "laravel",
-        ":package_slug"
+        "hygraph-api"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/combindma/hygraph-api",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Combind",
+            "email": "webmaster@combind.ma",
             "role": "Developer"
         }
     ],
@@ -34,13 +34,12 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories"
+            "Combindma\\HygraphApi\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "Combindma\\HygraphApi\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -52,16 +51,17 @@
         "format-v": "vendor/bin/pint -v"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
-            ],
-            "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
-            }
+                "Combindma\\HygraphApi\\HygraphApiServiceProvider"
+            ]
         }
     },
     "minimum-stability": "dev",
