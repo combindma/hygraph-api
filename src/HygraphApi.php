@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Log;
 
 class HygraphApi
 {
-    private string $endpoint;
+    protected string $endpoint;
 
-    private string $token;
+    protected string $token;
 
-    private int $ttl;
+    protected int $ttl;
 
     public function __construct()
     {
@@ -46,10 +46,12 @@ class HygraphApi
                     'title',
                     'publishedAt',
                     'updatedAt',
-                    (new Query('seo'))
-                        ->setSelectionSet(
-                            ['title', 'description', 'noIndex', (new Query('image'))->setSelectionSet(['url'])]
-                        ),
+                    (new Query('seo'))->setSelectionSet([
+                        'title',
+                        'description',
+                        'noIndex',
+                        (new Query('image'))->setSelectionSet(['url']),
+                    ]),
                 ]
             );
 
@@ -106,6 +108,27 @@ class HygraphApi
         });
     }
 
+    public function optionsAsArray(): array|null
+    {
+        return Cache::remember('options-as-array', $this->ttl, function () {
+            $gql = (new Query('settings'))
+                ->setSelectionSet(
+                    [
+                        'id',
+                        'option',
+                        'value',
+                    ]
+                );
+            $settings = $this->query($gql)->settings;
+            $array = [];
+            foreach ($settings as $setting) {
+                $array[$setting->option] = $setting->value;
+            }
+
+            return $array;
+        });
+    }
+
     public function redirects(): array
     {
         return Cache::remember('redirects', $this->ttl, function () {
@@ -141,7 +164,7 @@ class HygraphApi
                         'excerpt',
                         'publicationDate',
                         'modificationDate',
-                        (new Query('coverImage'))->setSelectionSet(['url'])
+                        (new Query('coverImage'))->setSelectionSet(['url']),
                         (new Query('categories'))->setSelectionSet(['name', 'slug']),
                     ]
                 );
@@ -163,7 +186,7 @@ class HygraphApi
 
     public function article(string $slug): object|null
     {
-        return Cache::remember($slug, $this->ttl, function () use ($slug) {
+        return Cache::remember('article_'.$slug, $this->ttl, function () use ($slug) {
             $gql = (new Query('post'))
                 ->setArguments(['where' => new RawObject('{slug: "'.$slug.'"}')])
                 ->setSelectionSet(
@@ -198,6 +221,10 @@ class HygraphApi
                     ]
                 );
 
+            if (empty($this->query($gql)->post)) {
+                abort('404');
+            }
+
             return $this->query($gql)->post;
         });
     }
@@ -215,7 +242,7 @@ class HygraphApi
                         'readingTime',
                         'excerpt',
                         'publicationDate',
-                        (new Query('coverImage'))->setSelectionSet(['url'])
+                        (new Query('coverImage'))->setSelectionSet(['url']),
                         (new Query('categories'))->setSelectionSet(['name', 'slug']),
                     ]
                 );
@@ -237,7 +264,7 @@ class HygraphApi
                     'excerpt',
                     'publicationDate',
                     'modificationDate',
-                    (new Query('coverImage'))->setSelectionSet(['url'])
+                    (new Query('coverImage'))->setSelectionSet(['url']),
                     (new Query('categories'))->setSelectionSet(['name', 'slug']),
                 ]
             );
