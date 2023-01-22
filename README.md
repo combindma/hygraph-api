@@ -33,8 +33,15 @@ return [
 ## Usage
 
 ```php
-$hygraphApi = new Combindma\HygraphApi();
-echo $hygraphApi->echoPhrase('Hello, Combindma!');
+use Combindma\HygraphApi\Facades\SeoHelper;
+use Combindma\HygraphApi\Facades\HygraphApi;
+
+
+SeoHelper::homepage(HygraphApi::page('xxxxx'));
+SeoHelper::page(HygraphApi::page('xxxx'));
+
+$post = HygraphApi::article($slug);
+SeoHelper::article($post);
 ```
 
 ## Testing
