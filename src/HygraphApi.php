@@ -40,9 +40,10 @@ class HygraphApi
         return null;
     }
 
-    public function pages(): array|object|null
+    public function pages(?string $lang = null): array|object|null
     {
         $gql = (new Query('pages'))
+            ->setArguments(['locales' => new RawObject($lang ?? $this->lang)])
             ->setSelectionSet(
                 [
                     'id',
@@ -153,11 +154,11 @@ class HygraphApi
         });
     }
 
-    public function posts(): array|Collection|null
+    public function posts(?string $lang = null): array|Collection|null
     {
-        return Cache::remember($this->lang.'_'.'allPosts', $this->ttl, function () {
+        return Cache::remember($lang ?? $this->lang.'_'.'allPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
-                ->setArguments(['locales' => new RawObject($this->lang), 'orderBy' => new RawObject('publicationDate_DESC')])
+                ->setArguments(['locales' => new RawObject($lang ?? $this->lang), 'orderBy' => new RawObject('publicationDate_DESC')])
                 ->setSelectionSet(
                     [
                         'id',
