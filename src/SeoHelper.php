@@ -19,8 +19,7 @@ class SeoHelper
             SEOTools::addImages([$page['seo_image']]);
         }
 
-        SEOTools::setTitle($page['meta_title'])
-            ->setDescription($page['meta_description']);
+        SEOTools::setTitle($page['meta_title'])->setDescription($page['meta_description']);
 
         OpenGraph::addProperty('local', app()->getLocale());
 

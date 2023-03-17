@@ -156,9 +156,9 @@ class HygraphApi
 
     public function posts(?string $lang = null): array|Collection|null
     {
-        return Cache::remember($lang ?? $this->lang.'_'.'allPosts', $this->ttl, function () {
+        return Cache::remember('allPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
-                ->setArguments(['locales' => new RawObject($lang ?? $this->lang), 'orderBy' => new RawObject('publicationDate_DESC')])
+                ->setArguments(['orderBy' => new RawObject('publicationDate_DESC')])
                 ->setSelectionSet(
                     [
                         'id',
@@ -179,9 +179,9 @@ class HygraphApi
 
     public function categories(): array|null
     {
-        return Cache::remember($this->lang.'_'.'allPostCategories', $this->ttl, function () {
+        return Cache::remember('allPostCategories', $this->ttl, function () {
             $gql = (new Query('categories'))
-                ->setArguments(['locales' => new RawObject($this->lang), 'orderBy' => new RawObject('name_ASC')])
+                ->setArguments(['orderBy' => new RawObject('name_ASC')])
                 ->setSelectionSet(['id', 'name', 'slug']);
 
             return $this->query($gql)->categories;
@@ -190,9 +190,9 @@ class HygraphApi
 
     public function article(string $slug): object|null
     {
-        return Cache::remember($this->lang.'_'.'article_'.$slug, $this->ttl, function () use ($slug) {
+        return Cache::remember('article_'.$slug, $this->ttl, function () use ($slug) {
             $gql = (new Query('post'))
-                ->setArguments(['locales' => new RawObject($this->lang), 'where' => new RawObject('{slug: "'.$slug.'"}')])
+                ->setArguments(['where' => new RawObject('{slug: "'.$slug.'"}')])
                 ->setSelectionSet(
                     [
                         'id',
@@ -240,9 +240,9 @@ class HygraphApi
 
     public function featuredPosts(): array|null
     {
-        return Cache::remember($this->lang.'_'.'featuredPosts', $this->ttl, function () {
+        return Cache::remember('featuredPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
-                ->setArguments(['locales' => new RawObject($this->lang), 'where' => new RawObject('{isFeatured: true}'), 'orderBy' => new RawObject('publicationDate_DESC')])
+                ->setArguments(['where' => new RawObject('{isFeatured: true}'), 'orderBy' => new RawObject('publicationDate_DESC')])
                 ->setSelectionSet(
                     [
                         'id',
@@ -263,7 +263,7 @@ class HygraphApi
     public function relatedPosts(array $ids): array|null
     {
         $gql = (new Query('posts'))
-            ->setArguments(['locales' => new RawObject($this->lang), 'where' => new RawObject('{id_in: ["'.implode('","', $ids).'"]}')])
+            ->setArguments(['where' => new RawObject('{id_in: ["'.implode('","', $ids).'"]}')])
             ->setSelectionSet(
                 [
                     'id',
