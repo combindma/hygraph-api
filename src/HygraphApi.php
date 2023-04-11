@@ -222,11 +222,6 @@ class HygraphApi
                             ),
                         (new Query('seo'))->setSelectionSet(['title', 'description', (new Query('image'))->setSelectionSet(['url'])]),
                         (new Query('relatedPosts'))->setSelectionSet(['id']),
-                        (new Query('toc'))->setSelectionSet([
-                            'title',
-                            'slug',
-                            (new Query('tocLinks'))->setSelectionSet(['title', 'slug']),
-                        ]),
                     ]
                 );
 
