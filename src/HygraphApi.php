@@ -75,6 +75,10 @@ class HygraphApi
                         'updatedAt',
                         (new Query('content'))->setSelectionSet(['html']),
                         (new Query('seo'))->setSelectionSet(['title', 'description', 'noIndex', (new Query('image'))->setSelectionSet(['url'])]),
+                        (new Query('hero'))->setSelectionSet(['title', 'label', 'description', 'catTitle', 'ctaLink', (new Query('image'))->setSelectionSet(['url'])]),
+                        (new Query('cta'))->setSelectionSet(['title', 'description', 'buttonTitle', 'buttonLink']),
+                        (new Query('sections'))->setSelectionSet(['id', 'title', (new Query('content'))->setSelectionSet(['html', 'text']), (new Query('image'))->setSelectionSet(['url'])]),
+                        (new Query('logos'))->setSelectionSet(['id', (new Query('images'))->setSelectionSet(['url'])]),
                     ]
                 );
             $page = $this->query($gql)->page;
@@ -87,6 +91,10 @@ class HygraphApi
                 'meta_description' => $page->seo->description,
                 'noIndex' => $page->seo->noIndex,
                 'seo_image' => $page->seo->image?->url,
+                'hero' => $page->hero,
+                'logos' => $page->logos,
+                'cta' => $page->cta,
+                'sections' => $page->sections,
             ];
         });
     }
@@ -164,7 +172,6 @@ class HygraphApi
                         'id',
                         'title',
                         'slug',
-                        'readingTime',
                         'excerpt',
                         'publicationDate',
                         'modificationDate',
@@ -174,6 +181,25 @@ class HygraphApi
                 );
 
             return collect($this->query($gql)->posts);
+        });
+    }
+
+    public function announcements(?string $lang = null): array|Collection|null
+    {
+        return Cache::remember('allAnnouncements', $this->ttl, function () {
+            $gql = (new Query('announcements'))
+                ->setArguments(['orderBy' => new RawObject('publicationDate_DESC')])
+                ->setSelectionSet(
+                    [
+                        'id',
+                        'title',
+                        'description',
+                        'publicationDate',
+                        (new Query('image'))->setSelectionSet(['url']),
+                    ]
+                );
+
+            return collect($this->query($gql)->announcements);
         });
     }
 
@@ -199,29 +225,14 @@ class HygraphApi
                         'title',
                         'slug',
                         'excerpt',
-                        'readingTime',
                         'publicationDate',
                         'modificationDate',
                         'tags',
                         (new Query('coverImage'))->setSelectionSet(['url']),
                         (new Query('content'))->setSelectionSet(['html']),
                         (new Query('categories'))->setSelectionSet(['id', 'name', 'slug']),
-                        (new Query('author'))
-                            ->setSelectionSet(
-                                [
-                                    'id',
-                                    'name',
-                                    'title',
-                                    'biography',
-                                    'instagram',
-                                    'linkedin',
-                                    'facebook',
-                                    'twitter',
-                                    (new Query('picture'))->setSelectionSet(['url']),
-                                ]
-                            ),
                         (new Query('seo'))->setSelectionSet(['title', 'description', (new Query('image'))->setSelectionSet(['url'])]),
-                        (new Query('relatedPosts'))->setSelectionSet(['id']),
+                        //(new Query('relatedPosts'))->setSelectionSet(['id']),
                     ]
                 );
 
@@ -264,7 +275,6 @@ class HygraphApi
                     'id',
                     'title',
                     'slug',
-                    'readingTime',
                     'excerpt',
                     'publicationDate',
                     'modificationDate',

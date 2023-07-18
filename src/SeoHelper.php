@@ -52,7 +52,7 @@ class SeoHelper
             'image' => $post->seo?->image?->url ?? $post->coverImage?->url,
             'published_time' => $post->publicationDate,
             'modified_time' => $post->modificationDate,
-            'author' => $post->author?->name,
+            'author' => config('app.name'),
         ];
 
         SEOTools::setTitle($article['title']);
@@ -64,7 +64,7 @@ class SeoHelper
                 'locale' => app()->getLocale(),
                 'published_time' => $article['published_time'],
                 'modified_time' => $article['modified_time'],
-                'author' => $article['author'],
+                'author' => config('app.name'),
             ])
             ->addProperty('locale', app()->getLocale());
 
@@ -81,7 +81,7 @@ class SeoHelper
             ])
             ->addValue('author', [
                 '@type' => 'Person',
-                'name' => $article['author'],
+                'name' => config('app.name'),
             ])
             ->addValue('mainEntityOfPage', [
                 '@type' => 'WebPage',

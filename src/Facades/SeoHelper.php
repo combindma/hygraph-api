@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \Combindma\HygraphApi\SeoHelper
+ *
+ * @method page(array $page): void
+ * @method homepage(array $page): void
+ * @method article($post): void
  */
 class SeoHelper extends Facade
 {
