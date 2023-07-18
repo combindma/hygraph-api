@@ -40,7 +40,7 @@ class HygraphApi
         return null;
     }
 
-    public function pages(?string $lang = null): array|object|null
+    public function pages(string $lang = null): array|object|null
     {
         $gql = (new Query('pages'))
             ->setArguments(['locales' => new RawObject($lang ?? $this->lang)])
@@ -99,7 +99,7 @@ class HygraphApi
         });
     }
 
-    public function options(): object|null
+    public function options(): ?object
     {
         return Cache::remember('options', $this->ttl, function () {
             $gql = (new Query('settings'))
@@ -120,7 +120,7 @@ class HygraphApi
         });
     }
 
-    public function optionsAsArray(): array|null
+    public function optionsAsArray(): ?array
     {
         return Cache::remember('options-as-array', $this->ttl, function () {
             $gql = (new Query('settings'))
@@ -162,7 +162,7 @@ class HygraphApi
         });
     }
 
-    public function posts(?string $lang = null): array|Collection|null
+    public function posts(string $lang = null): array|Collection|null
     {
         return Cache::remember('allPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
@@ -184,7 +184,7 @@ class HygraphApi
         });
     }
 
-    public function announcements(?string $lang = null): array|Collection|null
+    public function announcements(string $lang = null): array|Collection|null
     {
         return Cache::remember('allAnnouncements', $this->ttl, function () {
             $gql = (new Query('announcements'))
@@ -203,7 +203,7 @@ class HygraphApi
         });
     }
 
-    public function categories(): array|null
+    public function categories(): ?array
     {
         return Cache::remember('allPostCategories', $this->ttl, function () {
             $gql = (new Query('categories'))
@@ -214,7 +214,7 @@ class HygraphApi
         });
     }
 
-    public function article(string $slug): object|null
+    public function article(string $slug): ?object
     {
         return Cache::remember('article_'.$slug, $this->ttl, function () use ($slug) {
             $gql = (new Query('post'))
@@ -244,7 +244,7 @@ class HygraphApi
         });
     }
 
-    public function featuredPosts(): array|null
+    public function featuredPosts(): ?array
     {
         return Cache::remember('featuredPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
@@ -266,7 +266,7 @@ class HygraphApi
         });
     }
 
-    public function relatedPosts(array $ids): array|null
+    public function relatedPosts(array $ids): ?array
     {
         $gql = (new Query('posts'))
             ->setArguments(['where' => new RawObject('{id_in: ["'.implode('","', $ids).'"]}')])
