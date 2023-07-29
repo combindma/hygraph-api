@@ -18,6 +18,8 @@ class HygraphApi
 
     protected int $ttl;
 
+    protected string $defaultLocale;
+
     protected string $lang;
 
     public function __construct()
@@ -25,6 +27,7 @@ class HygraphApi
         $this->endpoint = config('hygraph.content_api');
         $this->token = config('hygraph.token');
         $this->ttl = config('hygraph.cache_ttl');
+        $this->defaultLocale = config('app.locale');
         $this->lang = substr(app()->getLocale(), 0, 2);
     }
 
@@ -40,28 +43,6 @@ class HygraphApi
         return null;
     }
 
-    public function pages(?string $lang = null): array|object|null
-    {
-        $gql = (new Query('pages'))
-            ->setArguments(['locales' => new RawObject($lang ?? $this->lang)])
-            ->setSelectionSet(
-                [
-                    'id',
-                    'title',
-                    'publishedAt',
-                    'updatedAt',
-                    (new Query('seo'))->setSelectionSet([
-                        'title',
-                        'description',
-                        'noIndex',
-                        (new Query('image'))->setSelectionSet(['url']),
-                    ]),
-                ]
-            );
-
-        return $this->query($gql);
-    }
-
     public function page(string $id): array
     {
         return Cache::remember($this->lang.'_'.$id, $this->ttl, function () use ($id) {
@@ -74,11 +55,11 @@ class HygraphApi
                         'publishedAt',
                         'updatedAt',
                         (new Query('content'))->setSelectionSet(['html']),
-                        (new Query('seo'))->setSelectionSet(['title', 'description', 'noIndex', (new Query('image'))->setSelectionSet(['url'])]),
-                        (new Query('hero'))->setSelectionSet(['title', 'label', 'description', 'catTitle', 'ctaLink', (new Query('image'))->setSelectionSet(['url'])]),
-                        (new Query('cta'))->setSelectionSet(['title', 'description', 'buttonTitle', 'buttonLink']),
-                        (new Query('sections'))->setSelectionSet(['id', 'title', (new Query('content'))->setSelectionSet(['html', 'text']), (new Query('image'))->setSelectionSet(['url'])]),
-                        (new Query('logos'))->setSelectionSet(['id', (new Query('images'))->setSelectionSet(['url'])]),
+                        (new Query('seo'))->setSelectionSet(['title', 'description', 'noIndex', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
+                        (new Query('hero'))->setSelectionSet(['title', 'label', 'description', 'catTitle', 'ctaLink', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
+                        (new Query('cta'))->setSelectionSet(['title', 'description', 'buttonTitle', 'buttonLink', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
+                        (new Query('sections'))->setSelectionSet(['id', 'title', (new Query('content'))->setSelectionSet(['html', 'text']), (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
+                        (new Query('logos'))->setSelectionSet(['id', (new Query('images'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
                     ]
                 );
             $page = $this->query($gql)->page;
@@ -99,7 +80,7 @@ class HygraphApi
         });
     }
 
-    public function options(): object|null
+    public function options(): ?object
     {
         return Cache::remember('options', $this->ttl, function () {
             $gql = (new Query('settings'))
@@ -120,7 +101,7 @@ class HygraphApi
         });
     }
 
-    public function optionsAsArray(): array|null
+    public function optionsAsArray(): ?array
     {
         return Cache::remember('options-as-array', $this->ttl, function () {
             $gql = (new Query('settings'))
@@ -162,7 +143,7 @@ class HygraphApi
         });
     }
 
-    public function posts(?string $lang = null): array|Collection|null
+    public function posts(string $lang = null): array|Collection|null
     {
         return Cache::remember('allPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
@@ -175,7 +156,7 @@ class HygraphApi
                         'excerpt',
                         'publicationDate',
                         'modificationDate',
-                        (new Query('coverImage'))->setSelectionSet(['url']),
+                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
                         (new Query('categories'))->setSelectionSet(['name', 'slug']),
                     ]
                 );
@@ -184,7 +165,7 @@ class HygraphApi
         });
     }
 
-    public function announcements(?string $lang = null): array|Collection|null
+    public function announcements(string $lang = null): array|Collection|null
     {
         return Cache::remember('allAnnouncements', $this->ttl, function () {
             $gql = (new Query('announcements'))
@@ -195,7 +176,7 @@ class HygraphApi
                         'title',
                         'description',
                         'publicationDate',
-                        (new Query('image'))->setSelectionSet(['url']),
+                        (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
                     ]
                 );
 
@@ -203,7 +184,7 @@ class HygraphApi
         });
     }
 
-    public function categories(): array|null
+    public function categories(): ?array
     {
         return Cache::remember('allPostCategories', $this->ttl, function () {
             $gql = (new Query('categories'))
@@ -214,7 +195,7 @@ class HygraphApi
         });
     }
 
-    public function article(string $slug): object|null
+    public function article(string $slug): ?object
     {
         return Cache::remember('article_'.$slug, $this->ttl, function () use ($slug) {
             $gql = (new Query('post'))
@@ -228,10 +209,10 @@ class HygraphApi
                         'publicationDate',
                         'modificationDate',
                         'tags',
-                        (new Query('coverImage'))->setSelectionSet(['url']),
+                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
                         (new Query('content'))->setSelectionSet(['html']),
                         (new Query('categories'))->setSelectionSet(['id', 'name', 'slug']),
-                        (new Query('seo'))->setSelectionSet(['title', 'description', (new Query('image'))->setSelectionSet(['url'])]),
+                        (new Query('seo'))->setSelectionSet(['title', 'description', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
                         //(new Query('relatedPosts'))->setSelectionSet(['id']),
                     ]
                 );
@@ -244,7 +225,7 @@ class HygraphApi
         });
     }
 
-    public function featuredPosts(): array|null
+    public function featuredPosts(): ?array
     {
         return Cache::remember('featuredPosts', $this->ttl, function () {
             $gql = (new Query('posts'))
@@ -257,7 +238,7 @@ class HygraphApi
                         'readingTime',
                         'excerpt',
                         'publicationDate',
-                        (new Query('coverImage'))->setSelectionSet(['url']),
+                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
                         (new Query('categories'))->setSelectionSet(['name', 'slug']),
                     ]
                 );
@@ -266,7 +247,7 @@ class HygraphApi
         });
     }
 
-    public function relatedPosts(array $ids): array|null
+    public function relatedPosts(array $ids): ?array
     {
         $gql = (new Query('posts'))
             ->setArguments(['where' => new RawObject('{id_in: ["'.implode('","', $ids).'"]}')])
@@ -278,7 +259,7 @@ class HygraphApi
                     'excerpt',
                     'publicationDate',
                     'modificationDate',
-                    (new Query('coverImage'))->setSelectionSet(['url']),
+                    (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
                     (new Query('categories'))->setSelectionSet(['name', 'slug']),
                 ]
             );
