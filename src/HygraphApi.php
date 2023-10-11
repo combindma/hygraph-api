@@ -6,7 +6,6 @@ use GraphQL\Client;
 use GraphQL\Exception\QueryError;
 use GraphQL\Query;
 use GraphQL\RawObject;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -56,10 +55,6 @@ class HygraphApi
                         'updatedAt',
                         (new Query('content'))->setSelectionSet(['html']),
                         (new Query('seo'))->setSelectionSet(['title', 'description', 'noIndex', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
-                        (new Query('hero'))->setSelectionSet(['title', 'label', 'description', 'catTitle', 'ctaLink', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
-                        (new Query('cta'))->setSelectionSet(['title', 'description', 'buttonTitle', 'buttonLink', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
-                        (new Query('sections'))->setSelectionSet(['id', 'title', (new Query('content'))->setSelectionSet(['html', 'text']), (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
-                        (new Query('logos'))->setSelectionSet(['id', (new Query('images'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
                     ]
                 );
             $page = $this->query($gql)->page;
@@ -72,10 +67,6 @@ class HygraphApi
                 'meta_description' => $page->seo->description,
                 'noIndex' => $page->seo->noIndex,
                 'seo_image' => $page->seo->image?->url,
-                'hero' => $page->hero,
-                'logos' => $page->logos,
-                'cta' => $page->cta,
-                'sections' => $page->sections,
             ];
         });
     }
@@ -141,129 +132,5 @@ class HygraphApi
 
             return $array;
         });
-    }
-
-    public function posts(string $lang = null): array|Collection|null
-    {
-        return Cache::remember('allPosts', $this->ttl, function () {
-            $gql = (new Query('posts'))
-                ->setArguments(['orderBy' => new RawObject('publicationDate_DESC')])
-                ->setSelectionSet(
-                    [
-                        'id',
-                        'title',
-                        'slug',
-                        'excerpt',
-                        'publicationDate',
-                        'modificationDate',
-                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
-                        (new Query('categories'))->setSelectionSet(['name', 'slug']),
-                    ]
-                );
-
-            return collect($this->query($gql)->posts);
-        });
-    }
-
-    public function announcements(string $lang = null): array|Collection|null
-    {
-        return Cache::remember('allAnnouncements', $this->ttl, function () {
-            $gql = (new Query('announcements'))
-                ->setArguments(['orderBy' => new RawObject('publicationDate_DESC')])
-                ->setSelectionSet(
-                    [
-                        'id',
-                        'title',
-                        'description',
-                        'publicationDate',
-                        (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
-                    ]
-                );
-
-            return collect($this->query($gql)->announcements);
-        });
-    }
-
-    public function categories(): ?array
-    {
-        return Cache::remember('allPostCategories', $this->ttl, function () {
-            $gql = (new Query('categories'))
-                ->setArguments(['orderBy' => new RawObject('name_ASC')])
-                ->setSelectionSet(['id', 'name', 'slug']);
-
-            return $this->query($gql)->categories;
-        });
-    }
-
-    public function article(string $slug): ?object
-    {
-        return Cache::remember('article_'.$slug, $this->ttl, function () use ($slug) {
-            $gql = (new Query('post'))
-                ->setArguments(['where' => new RawObject('{slug: "'.$slug.'"}')])
-                ->setSelectionSet(
-                    [
-                        'id',
-                        'title',
-                        'slug',
-                        'excerpt',
-                        'publicationDate',
-                        'modificationDate',
-                        'tags',
-                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
-                        (new Query('content'))->setSelectionSet(['html']),
-                        (new Query('categories'))->setSelectionSet(['id', 'name', 'slug']),
-                        (new Query('seo'))->setSelectionSet(['title', 'description', (new Query('image'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url'])]),
-                        //(new Query('relatedPosts'))->setSelectionSet(['id']),
-                    ]
-                );
-
-            if (empty($this->query($gql)->post)) {
-                abort('404');
-            }
-
-            return $this->query($gql)->post;
-        });
-    }
-
-    public function featuredPosts(): ?array
-    {
-        return Cache::remember('featuredPosts', $this->ttl, function () {
-            $gql = (new Query('posts'))
-                ->setArguments(['where' => new RawObject('{isFeatured: true}'), 'orderBy' => new RawObject('publicationDate_DESC')])
-                ->setSelectionSet(
-                    [
-                        'id',
-                        'title',
-                        'slug',
-                        'readingTime',
-                        'excerpt',
-                        'publicationDate',
-                        (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
-                        (new Query('categories'))->setSelectionSet(['name', 'slug']),
-                    ]
-                );
-
-            return $this->query($gql)->posts;
-        });
-    }
-
-    public function relatedPosts(array $ids): ?array
-    {
-        $gql = (new Query('posts'))
-            ->setArguments(['where' => new RawObject('{id_in: ["'.implode('","', $ids).'"]}')])
-            ->setSelectionSet(
-                [
-                    'id',
-                    'title',
-                    'slug',
-                    'excerpt',
-                    'publicationDate',
-                    'modificationDate',
-                    (new Query('coverImage'))->setArguments(['locales' => new RawObject($this->defaultLocale)])->setSelectionSet(['url']),
-                    (new Query('categories'))->setSelectionSet(['name', 'slug']),
-                ]
-            );
-
-        return $this->query($gql)->posts;
     }
 }
