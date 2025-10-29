@@ -7,9 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RedirectorService implements Redirector
 {
-    public function __construct(public HygraphApi $hygraphApi)
-    {
-    }
+    public function __construct(public HygraphApi $hygraphApi) {}
 
     public function getRedirectsFor(Request $request): array
     {
